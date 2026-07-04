@@ -22,17 +22,17 @@ export class Property<T = unknown> {
 		if (!opts.view) {
 			throw new Error('Property requires `opts.view`.');
 		}
-		
+
 		if (!opts.name) {
 			throw new Error('Property requires `opts.name`.');
 		}
 		if (!opts.key) {
 			throw new Error('Property requires `opts.key`.');
 		}
-		
+
 		const { view, name, key, value } = opts;
 		this.opts = { view, name, key };
-		
+
 		if (value !== undefined) {
 			if (view.isLoaded) {
 				view.set(name, key, value);
@@ -41,9 +41,9 @@ export class Property<T = unknown> {
 			}
 		}
 	}
-	
+
 	public readonly opts: Omit<TOptsProperty<T>, 'value'>;
-	
+
 	public get value(): T | null {
 		const { view, name, key } = this.opts;
 		if (view.isLoaded) {
@@ -51,7 +51,7 @@ export class Property<T = unknown> {
 		}
 		return null;
 	}
-	
+
 	public set value(v: T | null) {
 		const { view, name, key } = this.opts;
 		if (view.isLoaded) {

@@ -1,3 +1,4 @@
+// oxlint-disable unicorn/prefer-export-from
 import depsQmlui from '@node-3d/deps-qmlui';
 import { native } from './native.ts';
 
