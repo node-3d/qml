@@ -11,3 +11,5 @@ src/node_modules/
 bin-*/
 *.log
 *.qmlc
+.rslib/
+*.tgz
