@@ -31,7 +31,7 @@ const ui = new View({ width, height, file: 'gui.qml' });
 
 The QML engine must be initialized first. Then, new View instances can be created.
 
-* See [example](/examples/main.ts) for a complete setup.
+* See [example](examples/main.ts) for a complete setup.
 
 ## API
 
