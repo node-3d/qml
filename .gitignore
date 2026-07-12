@@ -12,4 +12,5 @@ bin-*/
 *.log
 *.qmlc
 .rslib/
+.clang-format
 *.tgz

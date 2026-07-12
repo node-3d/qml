@@ -1,13 +1,13 @@
 #ifdef __linux__
-	#include <dlfcn.h>
+#include <dlfcn.h>
 #endif
 
 #include "view.hpp"
 
 
 Napi::Object initModule(Napi::Env env, Napi::Object exports) {
-	// Preload the libs with OUR @RPATH, not some junk builtin rpaths
-	#ifdef __linux__
+// Preload the libs with OUR @RPATH, not some junk builtin rpaths
+#ifdef __linux__
 	dlopen("libQt6Core.so.6", RTLD_NOW | RTLD_GLOBAL);
 	dlopen("libQt6DBus.so.6", RTLD_NOW | RTLD_GLOBAL);
 	dlopen("libQt6Network.so.6", RTLD_NOW | RTLD_GLOBAL);
@@ -46,8 +46,8 @@ Napi::Object initModule(Napi::Env env, Napi::Object exports) {
 	dlopen("libQt6QmlWorkerScript.so.6", RTLD_NOW | RTLD_GLOBAL);
 	dlopen("libQt6QmlModels.so.6", RTLD_NOW | RTLD_GLOBAL);
 	dlopen("libqmlui.so", RTLD_NOW | RTLD_GLOBAL);
-	#endif
-	
+#endif
+
 	View::initClass(env, exports);
 	return exports;
 }
