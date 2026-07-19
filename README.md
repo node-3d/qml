@@ -7,25 +7,22 @@ This is a part of [Node3D](https://github.com/node-3d) project.
 [![Test](https://github.com/node-3d/qml/actions/workflows/test.yml/badge.svg)](https://github.com/node-3d/qml/actions/workflows/test.yml)
 [![Cpplint](https://github.com/node-3d/qml/actions/workflows/cpplint.yml/badge.svg)](https://github.com/node-3d/qml/actions/workflows/cpplint.yml)
 
-```console
+```bash
 npm install @node-3d/qml
 ```
 
-## Binary Provenance
+## Binary Origin
 
-Release binary archives for this package are published by public GitHub Actions
-workflows.
-When a release asset includes a GitHub Artifact Attestation, you can verify that
-the downloaded archive was published by the visible workflow in this repository:
+Release archives are built by this repository's public GitHub Actions workflows.
 
-```console
+Attestations: https://github.com/node-3d/qml/attestations
+
+To verify a downloaded archive:
+
+```bash
 gh release download <tag> -R node-3d/qml -p <platform>.gz
 gh attestation verify <platform>.gz -R node-3d/qml
 ```
-
-The attestation links the archive to the repository, workflow, commit, and
-release build identity. It does not replace review of the source code, workflow,
-or third-party library contents.
 
 **QML (Qt 6.8.0)** interoperation addon for **Node.js**.
 See [Qt Documentation](https://doc.qt.io/qt-6/qmlapplications.html)
