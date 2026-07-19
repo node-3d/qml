@@ -11,18 +11,7 @@ This is a part of [Node3D](https://github.com/node-3d) project.
 npm install @node-3d/qml
 ```
 
-## Binary Origin
 
-Release archives are built by this repository's public GitHub Actions workflows.
-
-Attestations: https://github.com/node-3d/qml/attestations
-
-To verify a downloaded archive:
-
-```bash
-gh release download <tag> -R node-3d/qml -p <platform>.gz
-gh attestation verify <platform>.gz -R node-3d/qml
-```
 
 **QML (Qt 6.8.0)** interoperation addon for **Node.js**.
 See [Qt Documentation](https://doc.qt.io/qt-6/qmlapplications.html)
@@ -128,3 +117,16 @@ const y = f1(a, b, c);
 
 Instances of this class are functions with an attached `opts` object. Arguments and return
 values are serialized through JSON, so keep them data-oriented.
+
+## Binary Origin
+
+Release archives are built by this repository's public GitHub Actions workflows.
+
+Attestations: https://github.com/node-3d/qml/attestations
+
+To verify a downloaded archive:
+
+```bash
+gh release download <tag> -R node-3d/qml -p <platform>.gz
+gh attestation verify <platform>.gz -R node-3d/qml
+```
