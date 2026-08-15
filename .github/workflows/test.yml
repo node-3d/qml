@@ -62,10 +62,7 @@ jobs:
           npm config get arch
 
       - name: Install Modules
-        run: npm ci --ignore-scripts
-
-      - name: Install Dependency Binaries
-        run: npm rebuild @node-3d/deps-qt-core @node-3d/deps-qt-gui @node-3d/deps-qt-qml @node-3d/deps-qmlui @node-3d/segfault
+        run: npm ci
 
       - name: Build Current Binary
         run: npm run build:rebuild
