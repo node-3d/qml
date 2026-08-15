@@ -1,14 +1,14 @@
-import { Image } from '@node-3d/image';
-import { webgl as gl } from '@node-3d/webgl';
-import { glfw, Document } from '@node-3d/glfw';
-import type { TEvent } from '@node-3d/glfw';
+import { Image, gl, glfw, Document } from '@node-3d/core';
 import { View } from '@node-3d/qml';
 
-Document.setWebgl(gl);
+type TKeyEvent = Parameters<View['keydown']>[0] & { keyCode?: unknown };
+type TMouseMoveEvent = Parameters<View['mousemove']>[0];
+type TMousePressEvent = Parameters<View['mousedown']>[0];
+type TMouseWheelEvent = Parameters<View['wheel']>[0];
 
 const doc = new Document({
 	vsync: true,
-	autoEsc: true,
+	ignoreQuit: true,
 	autoFullscreen: true,
 	title: 'QML',
 });
@@ -23,12 +23,38 @@ View.init(process.cwd(), doc.platformWindow, doc.platformContext, doc.platformDe
 const ui = new View({ width: doc.w, height: doc.h, file: 'qml/gui.qml' });
 doc.makeCurrent();
 
-doc.on('mousedown', ui.mousedown.bind(ui) as (event: TEvent) => void);
-doc.on('mouseup', ui.mouseup.bind(ui) as (event: TEvent) => void);
-doc.on('mousemove', ui.mousemove.bind(ui) as (event: TEvent) => void);
-doc.on('keydown', ui.keydown.bind(ui) as (event: TEvent) => void);
-doc.on('keyup', ui.keyup.bind(ui) as (event: TEvent) => void);
-doc.on('wheel', ui.wheel.bind(ui) as (event: TEvent) => void);
+let isCloseRequested = false;
+let isDestroyed = false;
+
+const requestClose = (): void => {
+	isCloseRequested = true;
+};
+
+const destroy = (): void => {
+	if (isDestroyed) {
+		return;
+	}
+
+	isDestroyed = true;
+	ui.destroy();
+	doc.makeCurrent();
+	doc.destroy();
+};
+
+doc.on('mousedown', (event: TMousePressEvent) => ui.mousedown(event));
+doc.on('mouseup', (event: TMousePressEvent) => ui.mouseup(event));
+doc.on('mousemove', (event: TMouseMoveEvent) => ui.mousemove(event));
+doc.on('keydown', (event: TKeyEvent) => {
+	if (event.keyCode === glfw.KEY_ESCAPE) {
+		requestClose();
+	}
+	ui.keydown(event);
+});
+doc.on('keyup', (event: TKeyEvent) => ui.keyup(event));
+doc.on('wheel', (event: TMouseWheelEvent) => ui.wheel(event));
+doc.on('quit', requestClose);
+
+process.once('SIGINT', requestClose);
 
 doc.on('resize', ({ width, height }) => {
 	ui.wh = [width, height] as [number, number];
@@ -206,6 +232,12 @@ const drawScene = () => {
 const loopFunc = (): void => {
 	View.update();
 	doc.makeCurrent();
+
+	if (isCloseRequested || doc.shouldClose) {
+		destroy();
+		return;
+	}
+
 	drawScene();
 	doc.requestAnimationFrame(loopFunc);
 };
