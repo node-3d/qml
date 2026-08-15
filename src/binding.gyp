@@ -27,7 +27,16 @@
 						"-Wl,-rpath,'$$ORIGIN:$$ORIGIN/../node_modules/@node-3d/deps-qt-core/<(bin):$$ORIGIN/../node_modules/@node-3d/deps-qt-gui/<(bin):$$ORIGIN/../node_modules/@node-3d/deps-qt-qml/<(bin):$$ORIGIN/../node_modules/@node-3d/deps-qmlui/<(bin):$$ORIGIN/../../@node-3d/deps-qt-core/<(bin):$$ORIGIN/../../@node-3d/deps-qt-gui/<(bin):$$ORIGIN/../../@node-3d/deps-qt-qml/<(bin):$$ORIGIN/../../@node-3d/deps-qmlui/<(bin):$$ORIGIN/../../deps-qt-core/<(bin):$$ORIGIN/../../deps-qt-gui/<(bin):$$ORIGIN/../../deps-qt-qml/<(bin):$$ORIGIN/../../deps-qmlui/<(bin)'",
 					],
 					'libraries': [
+						'-Wl,--no-as-needed',
+						'<(qt_core_bin)/libQt6Core.so.6',
+						'<(qt_core_bin)/libQt6Network.so.6',
+						'<(qt_gui_bin)/libQt6Gui.so.6',
+						'<(qt_gui_bin)/libQt6OpenGL.so.6',
+						'<(qt_qml_bin)/libQt6Qml.so.6',
+						'<(qt_qml_bin)/libQt6Quick.so.6',
+						'<(qt_qml_bin)/libQt6QuickControls2.so.6',
 						'<(qmlui_bin)/libqmlui.so',
+						'-Wl,--as-needed',
 					],
 				}],
 				
