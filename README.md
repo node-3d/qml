@@ -11,8 +11,6 @@ This is a part of [Node3D](https://github.com/node-3d) project.
 npm install @node-3d/qml
 ```
 
-
-
 **QML (Qt 6.8.0)** interoperation addon for **Node.js**.
 See [Qt Documentation](https://doc.qt.io/qt-6/qmlapplications.html)
 for QML features and syntax.
@@ -20,8 +18,8 @@ for QML features and syntax.
 ![Example](examples/screenshot.png)
 
 > Note: this **addon uses N-API**, and therefore is ABI-compatible across different
-Node.js versions. Addon binaries are precompiled and **there is no compilation**
-step during the `npm install` command.
+> Node.js versions. Addon binaries are precompiled and **there is no compilation**
+> step during the `npm install` command.
 
 ```js
 import { View } from '@node-3d/qml';
@@ -33,13 +31,12 @@ const ui = new View({ width, height, file: 'gui.qml' });
 
 The QML engine must be initialized first. Then, new View instances can be created.
 
-Supported binary platforms: Windows x64, Linux x64/ARM64, and macOS x64/ARM64.
-Windows ARM64 is not currently supported because `@node-3d/qml` depends on
-`@node-3d/deps-qmlui`, whose QmlUi integration requires shared OpenGL contexts
-and OpenGL texture IDs. The Qt 6.8.0 Windows ARM64 desktop package used by the
-dependency release does not expose the required `opengl` qmake module.
+- See [example](examples/main.ts) for a complete setup.
 
-* See [example](examples/main.ts) for a complete setup.
+Supported platforms: Windows x64, Linux x64/ARM64, and macOS x64/ARM64.
+
+> Windows ARM64 is not currently supported because the Qt 6.8.0 Windows ARM64 desktop
+> package does not expose the required `opengl` qmake module.
 
 ## API
 
@@ -48,40 +45,40 @@ dependency release does not expose the required `opengl` qmake module.
 `View` loads and manages one QML scene rendered into an OpenGL texture.
 Call `View.init(cwd, wnd, ctx, device?)` once before constructing views:
 
-* `cwd` - base path for relative QML files and the default `plugins` directory.
-* `wnd` - native platform window handle.
-* `ctx` - shared OpenGL context handle.
-* `device` - optional platform display/device handle.
+- `cwd` - base path for relative QML files and the default `plugins` directory.
+- `wnd` - native platform window handle.
+- `ctx` - shared OpenGL context handle.
+- `device` - optional platform display/device handle.
 
 Constructor options:
 
-* `width`, `height` - texture size, defaulting to `512`.
-* `file` - QML file to load immediately.
-* `source` - QML source string to load immediately.
-* `silent` - suppress QML runtime error logging.
+- `width`, `height` - texture size, defaulting to `512`.
+- `file` - QML file to load immediately.
+- `source` - QML source string to load immediately.
+- `silent` - suppress QML runtime error logging.
 
 Static helpers:
 
-* `View.libs(path)` - add a QML import directory.
-* `View.plugins(path)` - add a Qt plugin directory.
-* `View.style(name, fallback?)` - set the Qt Quick style.
-* `View.update()` - process pending QML events and async work.
+- `View.libs(path)` - add a QML import directory.
+- `View.plugins(path)` - add a Qt plugin directory.
+- `View.style(name, fallback?)` - set the Qt Quick style.
+- `View.update()` - process pending QML events and async work.
 
 Instance members:
 
-* `isLoaded`, `width`, `height`, `w`, `h`, `wh`, `size`, `textureId`
-* `load({ file } | { source })`
-* `destroy()`
-* `mousedown`, `mouseup`, `mousemove`, `wheel`, `keydown`, `keyup`
-* `get(name, key)`, `set(name, key, value)`, `invoke(name, key, args)`
+- `isLoaded`, `width`, `height`, `w`, `h`, `wh`, `size`, `textureId`
+- `load({ file } | { source })`
+- `destroy()`
+- `mousedown`, `mouseup`, `mousemove`, `wheel`, `keydown`, `keyup`
+- `get(name, key)`, `set(name, key, value)`, `invoke(name, key, args)`
 
 Important events:
 
-* `destroy` - QML scene was destroyed.
-* `load` - QML scene finished loading.
-* `reset`, with `textureId` - render texture was created or replaced.
-* `error` - QML load/runtime error.
-* Any custom event emitted by QML through `eventEmit(type, data)`.
+- `destroy` - QML scene was destroyed.
+- `load` - QML scene finished loading.
+- `reset`, with `textureId` - render texture was created or replaced.
+- `error` - QML load/runtime error.
+- Any custom event emitted by QML through `eventEmit(type, data)`.
 
 When the file is loaded, and whenever the QML scene is resized, a new GL texture ID is
 reported through `reset`. Use that texture on a full-screen quad for UI overlays, or on
