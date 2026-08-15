@@ -11,6 +11,11 @@ on:
         required: false
         type: string
 
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
 jobs:
   create_release:
     name: Create Release
@@ -41,7 +46,7 @@ jobs:
           fi
           echo "version=$release_tag" >> "$GITHUB_OUTPUT"
 
-      - name: Create Draft Release
+      - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v3
         env:
@@ -51,10 +56,32 @@ jobs:
           name: Release ${{ steps.package-version.outputs.version }}
 
   build:
-    name: Build
+    name: Build (${{ matrix.target }})
+    needs: create_release
     strategy:
-        matrix:
-          os: [ubuntu-22.04, windows-2022, macos-26]
+      fail-fast: false
+      matrix:
+        include:
+          - target: windows-x64
+            os: windows-2022
+            node_arch: x64
+            archflags: ''
+          - target: linux-x64
+            os: ubuntu-22.04
+            node_arch: x64
+            archflags: ''
+          - target: linux-arm64
+            os: ubuntu-24.04-arm
+            node_arch: arm64
+            archflags: ''
+          - target: darwin-x64
+            os: macos-15-intel
+            node_arch: x64
+            archflags: '-arch x86_64'
+          - target: darwin-arm64
+            os: macos-15
+            node_arch: arm64
+            archflags: '-arch arm64'
 
     runs-on: ${{ matrix.os }}
 
@@ -69,13 +96,26 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 24.13.0
+          architecture: ${{ matrix.node_arch }}
           cache: 'npm'
 
+      - name: Print Native Target
+        run: |
+          echo "runner=$(uname -s)-$(uname -m)"
+          node -p "'node=' + process.version + ' platform=' + process.platform + ' arch=' + process.arch"
+          npm config get arch
+
       - name: Install Modules
-        run: npm ci
+        run: npm ci --ignore-scripts
+
+      - name: Install Dependency Binaries
+        run: npm rebuild @node-3d/deps-qt-core @node-3d/deps-qt-gui @node-3d/deps-qt-qml @node-3d/deps-qmlui @node-3d/segfault
 
       - name: Build Current Binary
         run: npm run build:rebuild
+        env:
+          npm_config_arch: ${{ matrix.node_arch }}
+          ARCHFLAGS: ${{ matrix.archflags }}
 
       - name: Get Package Version
         id: package-version
@@ -89,6 +129,11 @@ jobs:
       - name: Pack Files
         id: pack-files
         run: node -e "import('@node-3d/addon-tools').then((m) => m.actionPack())" >> $GITHUB_OUTPUT
+
+      - name: Attest Binary
+        uses: actions/attest@v4
+        with:
+          subject-path: ${{ steps.pack-files.outputs.pack }}
 
       - name: Store Binaries
         uses: softprops/action-gh-release@v3

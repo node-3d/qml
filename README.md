@@ -33,6 +33,12 @@ const ui = new View({ width, height, file: 'gui.qml' });
 
 The QML engine must be initialized first. Then, new View instances can be created.
 
+Supported binary platforms: Windows x64, Linux x64/ARM64, and macOS x64/ARM64.
+Windows ARM64 is not currently supported because `@node-3d/qml` depends on
+`@node-3d/deps-qmlui`, whose QmlUi integration requires shared OpenGL contexts
+and OpenGL texture IDs. The Qt 6.8.0 Windows ARM64 desktop package used by the
+dependency release does not expose the required `opengl` qmake module.
+
 * See [example](examples/main.ts) for a complete setup.
 
 ## API

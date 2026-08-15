@@ -68,6 +68,9 @@
 		"@node-3d/segfault": "~4.0.0"
 	},
 	"devDependencies": {
+		"@node-3d/glfw": "7.3.0",
+		"@node-3d/image": "6.0.1",
+		"@node-3d/webgl": "6.0.1",
 		"@types/node": "24.13.2",
 		"node-addon-api": "8.9.0",
 		"oxlint": "1.72.0",
