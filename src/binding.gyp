@@ -33,6 +33,11 @@
 						"-Wl,-rpath,'$$ORIGIN/../../@node-3d/deps-qt-gui/<(bin)'",
 						"-Wl,-rpath,'$$ORIGIN/../../@node-3d/deps-qt-qml/<(bin)'",
 						"-Wl,-rpath,'$$ORIGIN/../../@node-3d/deps-qmlui/<(bin)'",
+						"-Wl,-rpath,'$$ORIGIN/../../deps-qt-core/<(bin)'",
+						"-Wl,-rpath,'$$ORIGIN/../../deps-qt-gui/<(bin)'",
+						"-Wl,-rpath,'$$ORIGIN/../../deps-qt-qml/<(bin)'",
+						"-Wl,-rpath,'$$ORIGIN/../../deps-qmlui/<(bin)'",
+						'<(qmlui_bin)/libqmlui.so',
 					],
 				}],
 				
@@ -49,6 +54,10 @@
 						'-Wl,-rpath,@loader_path/../../@node-3d/deps-qt-gui/<(bin)',
 						'-Wl,-rpath,@loader_path/../../@node-3d/deps-qt-qml/<(bin)',
 						'-Wl,-rpath,@loader_path/../../@node-3d/deps-qmlui/<(bin)',
+						'-Wl,-rpath,@loader_path/../../deps-qt-core/<(bin)',
+						'-Wl,-rpath,@loader_path/../../deps-qt-gui/<(bin)',
+						'-Wl,-rpath,@loader_path/../../deps-qt-qml/<(bin)',
+						'-Wl,-rpath,@loader_path/../../deps-qmlui/<(bin)',
 					],
 				}],
 				
