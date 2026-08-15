@@ -22,21 +22,11 @@
 			'library_dirs': ['<(qmlui_bin)'],
 			'conditions': [
 				['OS=="linux"', {
-					'libraries': [
+					'ldflags': [
 						"-Wl,--disable-new-dtags",
-						"-Wl,-rpath,'$$ORIGIN'",
-						"-Wl,-rpath,'$$ORIGIN/../node_modules/@node-3d/deps-qt-core/<(bin)'",
-						"-Wl,-rpath,'$$ORIGIN/../node_modules/@node-3d/deps-qt-gui/<(bin)'",
-						"-Wl,-rpath,'$$ORIGIN/../node_modules/@node-3d/deps-qt-qml/<(bin)'",
-						"-Wl,-rpath,'$$ORIGIN/../node_modules/@node-3d/deps-qmlui/<(bin)'",
-						"-Wl,-rpath,'$$ORIGIN/../../@node-3d/deps-qt-core/<(bin)'",
-						"-Wl,-rpath,'$$ORIGIN/../../@node-3d/deps-qt-gui/<(bin)'",
-						"-Wl,-rpath,'$$ORIGIN/../../@node-3d/deps-qt-qml/<(bin)'",
-						"-Wl,-rpath,'$$ORIGIN/../../@node-3d/deps-qmlui/<(bin)'",
-						"-Wl,-rpath,'$$ORIGIN/../../deps-qt-core/<(bin)'",
-						"-Wl,-rpath,'$$ORIGIN/../../deps-qt-gui/<(bin)'",
-						"-Wl,-rpath,'$$ORIGIN/../../deps-qt-qml/<(bin)'",
-						"-Wl,-rpath,'$$ORIGIN/../../deps-qmlui/<(bin)'",
+						"-Wl,-rpath,'$$ORIGIN:$$ORIGIN/../node_modules/@node-3d/deps-qt-core/<(bin):$$ORIGIN/../node_modules/@node-3d/deps-qt-gui/<(bin):$$ORIGIN/../node_modules/@node-3d/deps-qt-qml/<(bin):$$ORIGIN/../node_modules/@node-3d/deps-qmlui/<(bin):$$ORIGIN/../../@node-3d/deps-qt-core/<(bin):$$ORIGIN/../../@node-3d/deps-qt-gui/<(bin):$$ORIGIN/../../@node-3d/deps-qt-qml/<(bin):$$ORIGIN/../../@node-3d/deps-qmlui/<(bin):$$ORIGIN/../../deps-qt-core/<(bin):$$ORIGIN/../../deps-qt-gui/<(bin):$$ORIGIN/../../deps-qt-qml/<(bin):$$ORIGIN/../../deps-qmlui/<(bin)'",
+					],
+					'libraries': [
 						'<(qmlui_bin)/libqmlui.so',
 					],
 				}],
