@@ -67,7 +67,6 @@ jobs:
       - name: Build Current Binary
         run: npm run build:rebuild
         env:
-          npm_config_arch: ${{ matrix.node_arch }}
           ARCHFLAGS: ${{ matrix.archflags }}
 
       - name: Stamp Linux Runtime Paths
@@ -75,7 +74,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -qq patchelf
-          bin="$(npm_config_arch='${{ matrix.node_arch }}' node --input-type=module -e "import { getBin } from '@node-3d/addon-tools'; process.stdout.write(getBin());")"
+          bin="$(node --input-type=module -e "import { getBin } from '@node-3d/addon-tools'; process.stdout.write(getBin());")"
           rpath="\$ORIGIN:\$ORIGIN/../node_modules/@node-3d/deps-qt-core/$bin:\$ORIGIN/../node_modules/@node-3d/deps-qt-gui/$bin:\$ORIGIN/../node_modules/@node-3d/deps-qt-qml/$bin:\$ORIGIN/../node_modules/@node-3d/deps-qmlui/$bin:\$ORIGIN/../../@node-3d/deps-qt-core/$bin:\$ORIGIN/../../@node-3d/deps-qt-gui/$bin:\$ORIGIN/../../@node-3d/deps-qt-qml/$bin:\$ORIGIN/../../@node-3d/deps-qmlui/$bin:\$ORIGIN/../../deps-qt-core/$bin:\$ORIGIN/../../deps-qt-gui/$bin:\$ORIGIN/../../deps-qt-qml/$bin:\$ORIGIN/../../deps-qmlui/$bin"
           patchelf --force-rpath --set-rpath "$rpath" "$bin/qml.node"
           readelf -d "$bin/qml.node" | grep -E 'RPATH|RUNPATH|NEEDED'
