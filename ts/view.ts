@@ -1,3 +1,4 @@
+// oxlint-disable no-underscore-dangle
 import Emitter from 'node:events';
 import path from 'node:path';
 import { inspect, inherits } from 'node:util';
@@ -88,7 +89,7 @@ const ReEmitter = function ReEmitter(this: TReEmitterThis): void {
 	Emitter.call(this);
 };
 
-ReEmitter.prototype.emit = function emit(
+(ReEmitter.prototype as { emit: unknown }).emit = function emit(
 	this: TReEmitterThis,
 	type: string | symbol,
 	data?: unknown,
@@ -158,8 +159,8 @@ export class View extends Emitter {
 
 		this.opts = {
 			...opts,
-			width: opts.width || 512,
-			height: opts.height || 512,
+			width: opts.width ?? 512,
+			height: opts.height ?? 512,
 			silent: Boolean(opts.silent),
 		};
 		this.widthValue = this.opts.width;
@@ -182,7 +183,7 @@ export class View extends Emitter {
 			return;
 		}
 		this.widthValue = v;
-		this.viewBinding['_resize'](this.widthValue, this.heightValue);
+		this.viewBinding._resize(this.widthValue, this.heightValue);
 	}
 
 	/** Height in pixels. */
@@ -194,7 +195,7 @@ export class View extends Emitter {
 			return;
 		}
 		this.heightValue = v;
-		this.viewBinding['_resize'](this.widthValue, this.heightValue);
+		this.viewBinding._resize(this.widthValue, this.heightValue);
 	}
 
 	/** Alias for width. */
@@ -231,7 +232,7 @@ export class View extends Emitter {
 		}
 		this.widthValue = width;
 		this.heightValue = height;
-		this.viewBinding['_resize'](this.widthValue, this.heightValue);
+		this.viewBinding._resize(this.widthValue, this.heightValue);
 	}
 
 	/** OpenGL texture ID for QML scene RTT resource. */
@@ -244,7 +245,7 @@ export class View extends Emitter {
 	}
 
 	/** Stringification helper. */
-	public toString(): string {
+	public override toString(): string {
 		return `View { ${this.widthValue}x${this.heightValue} ${
 			this.loaded ? `loaded ${this.fileSource ? `file: ${this.source} ` : '[inline] '}` : ''
 		}}`;
@@ -252,32 +253,32 @@ export class View extends Emitter {
 
 	/** Send "mousedown" event into the QML scene. */
 	public mousedown(e: TMouseEventPress): void {
-		this.viewBinding['_mouse'](1, e.button, e.buttons, e.x, e.y);
+		this.viewBinding._mouse(1, e.button, e.buttons, e.x, e.y);
 	}
 
 	/** Send "mouseup" event into the QML scene. */
 	public mouseup(e: TMouseEventPress): void {
-		this.viewBinding['_mouse'](2, e.button, e.buttons, e.x, e.y);
+		this.viewBinding._mouse(2, e.button, e.buttons, e.x, e.y);
 	}
 
 	/** Send "mousemove" event into the QML scene. */
 	public mousemove(e: TMouseEventCommon): void {
-		this.viewBinding['_mouse'](0, 0, e.buttons, e.x, e.y);
+		this.viewBinding._mouse(0, 0, e.buttons, e.x, e.y);
 	}
 
 	/** Send "wheel" event into the QML scene. */
 	public wheel(e: TMouseEventWheel): void {
-		this.viewBinding['_mouse'](3, e.wheelDelta, e.buttons, e.x, e.y);
+		this.viewBinding._mouse(3, e.wheelDelta, e.buttons, e.x, e.y);
 	}
 
 	/** Send "keydown" event into the QML scene. */
 	public keydown(e: TKeyEvent): void {
-		this.viewBinding['_keyboard'](1, e.which, e.charCode);
+		this.viewBinding._keyboard(1, e.which, e.charCode);
 	}
 
 	/** Send "keyup" event into the QML scene. */
 	public keyup(e: TKeyEvent): void {
-		this.viewBinding['_keyboard'](0, e.which, e.charCode);
+		this.viewBinding._keyboard(0, e.which, e.charCode);
 	}
 
 	/**
@@ -318,12 +319,12 @@ export class View extends Emitter {
 				? this.source
 				: `${qmlCwd}/${this.source}`;
 
-			this.viewBinding['_load'](true, this.finalSource);
+			this.viewBinding._load(true, this.finalSource);
 			return;
 		}
 
 		this.finalSource = this.source;
-		this.viewBinding['_load'](false, this.source);
+		this.viewBinding._load(false, this.source);
 	}
 
 	/** Unload the current QML scene. */
@@ -337,7 +338,7 @@ export class View extends Emitter {
 
 		if (viewInstances.has(this.index)) {
 			viewInstances.delete(this.index);
-			this.viewBinding['_destroy']();
+			this.viewBinding._destroy();
 		}
 
 		this.index = -1;
@@ -345,17 +346,17 @@ export class View extends Emitter {
 
 	/** Invoke a method in QML scene. */
 	public invoke(name: string, key: string, args: readonly unknown[]): unknown {
-		return parseJsonSafe(this.viewBinding['_invoke'](name, key, JSON.stringify(args)));
+		return parseJsonSafe(this.viewBinding._invoke(name, key, JSON.stringify(args)));
 	}
 
 	/** Set property value of an object in QML scene. */
 	public set(name: string, key: string, value: unknown): void {
-		this.viewBinding['_set'](name, key, `[${JSON.stringify(value)}]`);
+		this.viewBinding._set(name, key, `[${JSON.stringify(value)}]`);
 	}
 
 	/** Get property value from an object in QML scene. */
 	public get(name: string, key: string): unknown {
-		return parseJsonSafe(this.viewBinding['_get'](name, key));
+		return parseJsonSafe(this.viewBinding._get(name, key));
 	}
 
 	/**
@@ -370,8 +371,8 @@ export class View extends Emitter {
 		inited = true;
 		qmlCwd = cwd.replaceAll('\\', '/');
 
-		NativeView['_plugins'](`${qmlCwd}/plugins`);
-		NativeView['_init'](qmlCwd, wnd, ctx, device, parseJsonSafe);
+		NativeView._plugins(`${qmlCwd}/plugins`);
+		NativeView._init(qmlCwd, wnd, ctx, device, parseJsonSafe);
 	}
 
 	/** Register a QML "library" directory for `*.qml` import resolution. */
@@ -382,7 +383,7 @@ export class View extends Emitter {
 
 		globalLibs.push(libraryPath);
 		for (const view of viewInstances.values()) {
-			view.viewBinding['_libs'](libraryPath);
+			view.viewBinding._libs(libraryPath);
 		}
 	}
 
@@ -392,7 +393,7 @@ export class View extends Emitter {
 			throw new Error('Not inited. Call View.init(...) first.');
 		}
 
-		NativeView['_plugins'](pluginPath);
+		NativeView._plugins(pluginPath);
 	}
 
 	/** Assign a QML style value. */
@@ -401,7 +402,7 @@ export class View extends Emitter {
 			throw new Error('Not inited. Call View.init(...) first.');
 		}
 
-		NativeView['_style'](name, fallback);
+		NativeView._style(name, fallback);
 	}
 
 	/**
@@ -427,27 +428,27 @@ export class View extends Emitter {
 		};
 
 		for (const libraryPath of globalLibs) {
-			this.viewBinding['_libs'](libraryPath);
+			this.viewBinding._libs(libraryPath);
 		}
 		this.constructed = true;
 
-		this.viewBinding.on('_qml_error', (data: TQmlEvent) =>
+		this.viewBinding.on('_qml_error', (data: TQmlEvent) => {
 			setImmediate(() => {
 				if (!this.opts.silent) {
 					logger.error(`Qml Error: (${data.type})`, data.message);
 				}
 				this.emit('error', new Error(`${data.type}: ${data.message}`));
-			}),
-		);
+			});
+		});
 
-		this.viewBinding.on('_qml_fbo', (data: TQmlEvent) =>
+		this.viewBinding.on('_qml_fbo', (data: TQmlEvent) => {
 			setImmediate(() => {
 				this.texture = data.texture ?? null;
 				this.emit('reset', this.texture);
-			}),
-		);
+			});
+		});
 
-		this.viewBinding.on('_qml_load', (data: TQmlEvent) =>
+		this.viewBinding.on('_qml_load', (data: TQmlEvent) => {
 			setImmediate(() => {
 				if (data.source !== this.finalSource || data.status === 'loading') {
 					return;
@@ -462,19 +463,19 @@ export class View extends Emitter {
 				this.loaded = true;
 				View.finishLoad(this);
 				this.emit('load');
-			}),
-		);
+			});
+		});
 
-		this.viewBinding.on('_qml_mouse', (data: TQmlEvent) =>
+		this.viewBinding.on('_qml_mouse', (data: TQmlEvent) => {
 			setImmediate(() => {
 				this.emit(data.type, data);
-			}),
-		);
-		this.viewBinding.on('_qml_key', (data: TQmlEvent) =>
+			});
+		});
+		this.viewBinding.on('_qml_key', (data: TQmlEvent) => {
 			setImmediate(() => {
 				this.emit(data.type, data);
-			}),
-		);
+			});
+		});
 
 		if (this.opts.file || this.opts.source) {
 			this.load();

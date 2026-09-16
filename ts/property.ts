@@ -19,10 +19,6 @@ export type TOptsProperty<T> = Readonly<{
  */
 export class Property<T = unknown> {
 	public constructor(opts: TOptsProperty<T>) {
-		if (!opts.view) {
-			throw new Error('Property requires `opts.view`.');
-		}
-
 		if (!opts.name) {
 			throw new Error('Property requires `opts.name`.');
 		}
@@ -47,7 +43,7 @@ export class Property<T = unknown> {
 	public get value(): T | null {
 		const { view, name, key } = this.opts;
 		if (view.isLoaded) {
-			return (view.get(name, key) as T | null) || null;
+			return (view.get(name, key) as T | null) ?? null;
 		}
 		return null;
 	}

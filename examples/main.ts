@@ -1,7 +1,7 @@
 import { Image, gl, glfw, Document } from '@node-3d/core';
 import { View } from '@node-3d/qml';
+import type { TKeyEvent } from '@node-3d/glfw';
 
-type TKeyEvent = Parameters<View['keydown']>[0] & { keyCode?: unknown };
 type TMouseMoveEvent = Parameters<View['mousemove']>[0];
 type TMousePressEvent = Parameters<View['mousedown']>[0];
 type TMouseWheelEvent = Parameters<View['wheel']>[0];
@@ -45,7 +45,7 @@ doc.on('mousedown', (event: TMousePressEvent) => ui.mousedown(event));
 doc.on('mouseup', (event: TMousePressEvent) => ui.mouseup(event));
 doc.on('mousemove', (event: TMouseMoveEvent) => ui.mousemove(event));
 doc.on('keydown', (event: TKeyEvent) => {
-	if (event.keyCode === glfw.KEY_ESCAPE) {
+	if (event.key === 'Escape') {
 		requestClose();
 	}
 	ui.keydown(event);

@@ -22,14 +22,10 @@ export type TNewableMethod = new (opts: TOptsMethod) => TMethod;
  * target method. The arguments and return value must be serializable.
  */
 const MethodConstructor = function MethodConstructor(opts: TOptsMethod): TMethod {
-	if (!opts.view) {
-		throw new Error('Method requires opts.view.');
-	}
-
-	if (!(opts.name && typeof opts.name === 'string')) {
+	if (!opts.name) {
 		throw new Error('Method requires `string opts.name`.');
 	}
-	if (!(opts.key && typeof opts.key === 'string')) {
+	if (!opts.key) {
 		throw new Error('Method requires `string opts.key`.');
 	}
 
@@ -40,7 +36,9 @@ const MethodConstructor = function MethodConstructor(opts: TOptsMethod): TMethod
 			return view.invoke(name, key, args);
 		}
 
-		view.once('load', () => view.invoke(name, key, args));
+		view.once('load', () => {
+			view.invoke(name, key, args);
+		});
 		return null;
 	}) as TMethod;
 
