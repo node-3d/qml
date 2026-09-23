@@ -63,11 +63,11 @@
 	},
 	"dependencies": {
 		"@node-3d/addon-tools": "~10.1.0",
-		"@node-3d/deps-qmlui": "~5.0.0",
-		"@node-3d/segfault": "~4.0.0"
+		"@node-3d/deps-qmlui": "~5.0.1",
+		"@node-3d/segfault": "~4.0.2"
 	},
 	"devDependencies": {
-		"@node-3d/core": "~6.3.0",
+		"@node-3d/core": "~6.4.0",
 		"@types/node": "24.13.2",
 		"node-addon-api": "8.9.2",
 		"oxlint": "1.81.0",
