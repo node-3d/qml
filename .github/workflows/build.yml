@@ -7,60 +7,36 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: 'Release tag/version to build. Defaults to package.json version.'
+        description: 'Binary release tag to update.'
         required: false
+        default: '5.0.0'
         type: string
 
 permissions:
-  contents: write
-  id-token: write
-  attestations: write
+  contents: read
 
 jobs:
-  create_release:
-    name: Create Release
-    runs-on: ubuntu-latest
-
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
-
+  package:
+    name: Pack npm Candidate
+    runs-on: ubuntu-22.04
     steps:
-
-      - name: Fetch Repository
-        uses: actions/checkout@v7
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
-
-      - name: Install Node.js
-        uses: actions/setup-node@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 24.13.0
-          cache: 'npm'
-
-      - name: Get Package Version
-        id: package-version
-        run: |
-          release_tag="${{ inputs.release_tag }}"
-          if [ -z "$release_tag" ]; then
-            release_tag="$(node -p "require('./package').version")"
-          fi
-          echo "version=$release_tag" >> "$GITHUB_OUTPUT"
-
-      - name: Create Release
-        id: create_release
-        uses: softprops/action-gh-release@v3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.package-version.outputs.version }}
-          name: Release ${{ steps.package-version.outputs.version }}
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Store npm Candidate
+        uses: node-3d/addon-tools/actions/npm-candidate-upload@1073c0a6403f6c20df2135f03950a568e865aa16
 
   build:
     name: Build (${{ matrix.target }})
-    needs: create_release
+    needs: package
     strategy:
       fail-fast: false
-      matrix:
+      matrix: &native-matrix
         include:
           - target: windows-x64
             os: windows-2022
@@ -82,37 +58,27 @@ jobs:
             os: macos-15
             node_arch: arm64
             archflags: '-arch arm64'
-
     runs-on: ${{ matrix.os }}
-
     steps:
-
-      - name: Fetch Repository
-        uses: actions/checkout@v7
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
-
-      - name: Install Node.js
-        uses: actions/setup-node@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 24.13.0
           architecture: ${{ matrix.node_arch }}
-          cache: 'npm'
-
+          cache: npm
       - name: Print Native Target
         run: |
           echo "runner=$(uname -s)-$(uname -m)"
           node -p "'node=' + process.version + ' platform=' + process.platform + ' arch=' + process.arch"
           npm config get arch
-
       - name: Install Modules
         run: npm ci
-
       - name: Build Current Binary
         run: npm run build:rebuild
         env:
           ARCHFLAGS: ${{ matrix.archflags }}
-
       - name: Stamp Linux Runtime Paths
         if: startsWith(matrix.target, 'linux-')
         run: |
@@ -123,16 +89,6 @@ jobs:
           patchelf --force-rpath --set-rpath "$rpath" "$bin/qml.node"
           readelf -d "$bin/qml.node" | grep -E 'RPATH|RUNPATH|NEEDED'
           readelf -d "$bin/qml.node" | grep -q 'deps-qt-core'
-
-      - name: Get Package Version
-        id: package-version
-        run: |
-          release_tag="${{ inputs.release_tag }}"
-          if [ -z "$release_tag" ]; then
-            release_tag="$(node -p "require('./package').version")"
-          fi
-          echo "version=$release_tag" >> "$GITHUB_OUTPUT"
-
       - name: Verify macOS deployment target
         if: startsWith(matrix.target, 'darwin-')
         run: |
@@ -154,20 +110,69 @@ jobs:
           done < <(find bin-* -type f \( -name '*.node' -o -name '*.dylib' \) -print0)
           test "$checked" -gt 0
           echo "Verified $checked Mach-O files target macOS 13.5"
-      - name: Pack Files
-        id: pack-files
-        run: node -e "import('@node-3d/addon-tools').then((m) => m.actionPack())" >> $GITHUB_OUTPUT
+      - name: Store Native Candidate
+        uses: node-3d/addon-tools/actions/native-candidate-upload@1073c0a6403f6c20df2135f03950a568e865aa16
+        with:
+          artifact-name: native-${{ matrix.target }}
 
-      - name: Attest Binary
+  consumer-tests:
+    name: Packed Consumer (${{ matrix.target }})
+    needs: [package, build]
+    strategy:
+      fail-fast: false
+      matrix: *native-matrix
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.13.0
+          architecture: ${{ matrix.node_arch }}
+      - name: Install Qt runtime dependencies - Linux
+        if: startsWith(matrix.target, 'linux-')
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -qq libegl1 libdbus-1-3 libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0 libxcb-xinerama0 libxcb-xinput0 libxcb-xfixes0 libxcb-xkb1 libxkbcommon-x11-0
+      - name: Install Packed Consumer Candidate
+        id: consumer
+        uses: node-3d/addon-tools/actions/consumer-install@1073c0a6403f6c20df2135f03950a568e865aa16
+        with:
+          package-name: '@node-3d/qml'
+          binary-artifact: native-${{ matrix.target }}
+          fixture: test-consumer
+      - name: Run Packed Consumer Tests
+        working-directory: ${{ steps.consumer.outputs.directory }}
+        run: npm test
+
+  release:
+    name: Update Binary Release
+    needs: consumer-tests
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Download Native Candidates
+        uses: actions/download-artifact@v8
+        with:
+          pattern: native-*
+          path: release-candidates
+          merge-multiple: true
+      - name: Attest Binaries
         uses: actions/attest@v4
         with:
-          subject-path: ${{ steps.pack-files.outputs.pack }}
-
-      - name: Store Binaries
+          subject-path: release-candidates/*.gz
+      - name: Update Release
         uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.package-version.outputs.version }}
-          name: Release ${{ steps.package-version.outputs.version }}
-          files: ${{ steps.pack-files.outputs.pack }}
+          tag_name: ${{ inputs.release_tag }}
+          name: Release ${{ inputs.release_tag }}
+          files: release-candidates/*.gz
